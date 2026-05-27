@@ -17,7 +17,6 @@
             box-sizing: border-box;
         }
         
-        /* Estilização Geral para os Blocos de Publicidade */
         .ads-banner {
             background-color: #f1f3f5;
             border: 2px dashed #adb5bd;
@@ -35,7 +34,7 @@
         
         .ads-header {
             width: 100%;
-            max-width: 728px; /* Padrão Leaderboard */
+            max-width: 728px;
             min-height: 90px;
             margin-bottom: 25px;
         }
@@ -200,25 +199,27 @@
         calcularDiferenca();
     }
 
+    // Função modificada seguindo a sua sugestão
     function pularAnos() {
-        const d1Value = document.getElementById('data1').value;
         const anosSaltoInput = document.getElementById('anosSalto').value;
 
-        if (!d1Value) {
-            alert("Por favor, defina a Data Inicial (Calendário 1) primeiro.");
-            return;
-        }
         if (!anosSaltoInput || isNaN(anosSaltoInput)) {
             alert("Por favor, digite um número válido de anos.");
             return;
         }
 
-        const anosParaAdicionar = parseInt(anosSaltoInput, 10);
-        const data1 = new Date(d1Value + 'T00:00:00');
-        
-        data1.setFullYear(data1.getFullYear() + anosParaAdicionar);
+        // 1. Força o Calendário 1 a pular para a data de HOJE primeiro
+        const hojeStr = obterDataHojeString();
+        document.getElementById('data1').value = hojeStr;
 
-        document.getElementById('data2').value = formatarDataISO(data1);
+        // 2. Realiza o cálculo do salto baseado no dia de hoje
+        const anosParaAdicionar = parseInt(anosSaltoInput, 10);
+        const dataFoco = new Date(hojeStr + 'T00:00:00');
+        
+        dataFoco.setFullYear(dataFoco.getFullYear() + anosParaAdicionar);
+
+        // 3. Atualiza o Calendário 2 e roda o recalculador geral
+        document.getElementById('data2').value = formatarDataISO(dataFoco);
         calcularDiferenca();
     }
 
