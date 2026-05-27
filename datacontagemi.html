@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Datas Avançada</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        
+        .ads-banner {
+            background-color: #f1f3f5;
+            border: 2px dashed #adb5bd;
+            color: #6c757d;
+            text-align: center;
+            padding: 15px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 8px;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .ads-header {
+            width: 100%;
+            max-width: 728px;
+            min-height: 90px;
+            margin-bottom: 25px;
+        }
+
+        .ads-footer {
+            width: 100%;
+            max-width: 728px;
+            min-height: 90px;
+            margin-top: 25px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 480px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+        .date-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="date"], input[type="number"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 16px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .jump-row input[type="number"] {
+            flex: 2; 
+        }
+        .jump-row button {
+            flex: 1;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+            white-space: nowrap;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .jump-box {
+            background-color: #f8f9fa;
+            border: 1px dashed #ccc;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .result-box {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            border-left: 5px solid #28a745;
+        }
+        .result-box p {
+            margin: 8px 0;
+            font-size: 16px;
+            color: #333;
+        }
+        .alert-box {
+            margin-top: 15px;
+            padding: 12px;
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+            border-radius: 6px;
+            display: none;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ads-banner ads-header">
+    Espaço para Publicidade (Cabeçalho - 728x90)
+</div>
+
+<div class="container">
+    <h2>Contador e Saltador de Datas</h2>
+    
+    <div class="date-group">
+        <label for="data1">Data Inicial (Calendário 1):</label>
+        <div class="input-row">
+            <input type="date" id="data1" onchange="calcularDiferenca()">
+            <button onclick="definirHoje('data1')">Hoje</button>
+        </div>
+    </div>
+
+    <div class="jump-box">
+        <label for="anosSalto">Adicionar/Subtrair Anos no Calendário 2:</label>
+        <div class="input-row jump-row">
+            <input type="number" id="anosSalto" placeholder="Ex: 5 ou -2" step="1">
+            <button onclick="pularAnos()" style="background-color: #28a745;">Aplicar</button>
+        </div>
+    </div>
+
+    <div class="date-group">
+        <label for="data2">Data Final (Calendário 2):</label>
+        <div class="input-row">
+            <input type="date" id="data2" onchange="calcularDiferenca()">
+            <button onclick="definirHoje('data2')">Hoje</button>
+        </div>
+    </div>
+
+    <div class="result-box">
+        <p><strong>Total de dias absolutos:</strong> <span id="resultadoDias">0</span> dias</p>
+        <p><strong>Total de semanas absolutas:</strong> <span id="resultadoSemanasAbsolutas">0</span> semanas</p>
+        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+        <p><strong>Tempo decorrido aproximado:</strong></p>
+        <p>• <span id="resAnos">0</span> anos passados</p>
+    </div>
+
+    <div id="alertaFuturo" class="alert-box"></div>
+</div>
+
+<div class="ads-banner ads-footer">
+    Espaço para Publicidade (Rodapé - 728x90)
+</div>
+
+<script>
+    function formatarDataISO(date) {
+        const ano = date.getFullYear();
+        const mes = String(date.getMonth() + 1).padStart(2, '0');
+        const dia = String(date.getDate()).padStart(2, '0');
+        return `${ano}-${mes}-${dia}`;
+    }
+
+    function obterDataHojeString() {
+        return formatarDataISO(new Date());
+    }
+
+    function definirHoje(idInput) {
+        document.getElementById(idInput).value = obterDataHojeString();
+        calcularDiferenca();
+    }
+
+    // Função modificada seguindo a sua sugestão
+    function pularAnos() {
+        const anosSaltoInput = document.getElementById('anosSalto').value;
+
+        if (!anosSaltoInput || isNaN(anosSaltoInput)) {
+            alert("Por favor, digite um número válido de anos.");
+            return;
+        }
+
+        // 1. Força o Calendário 1 a pular para a data de HOJE primeiro
+        const hojeStr = obterDataHojeString();
+        document.getElementById('data1').value = hojeStr;
+
+        // 2. Realiza o cálculo do salto baseado no dia de hoje
+        const anosParaAdicionar = parseInt(anosSaltoInput, 10);
+        const dataFoco = new Date(hojeStr + 'T00:00:00');
+        
+        dataFoco.setFullYear(dataFoco.getFullYear() + anosParaAdicionar);
+
+        // 3. Atualiza o Calendário 2 e roda o recalculador geral
+        document.getElementById('data2').value = formatarDataISO(dataFoco);
+        calcularDiferenca();
+    }
+
+    window.onload = function() {
+        const hojeStr = obterDataHojeString();
+        document.getElementById('data1').value = hojeStr;
+        document.getElementById('data2').value = hojeStr;
+        calcularDiferenca();
+    };
+
+    function calcularDiferenca() {
+        const d1Value = document.getElementById('data1').value;
+        const d2Value = document.getElementById('data2').value;
+
+        if (!d1Value || !d2Value) return;
+
+        let data1 = new Date(d1Value + 'T00:00:00');
+        let data2 = new Date(d2Value + 'T00:00:00');
+        const hoje = new Date(obterDataHojeString() + 'T00:00:00');
+
+        if (data1 > data2) {
+            let temp = data1;
+            data1 = data2;
+            data2 = temp;
+        }
+
+        const diferencaMilissegundos = data2 - data1;
+        const totalDiasAbsolutos = Math.floor(diferencaMilissegundos / (1000 * 60 * 60 * 24));
+        const totalSemanasAbsolutas = Math.floor(totalDiasAbsolutos / 7);
+
+        let anosPassados = data2.getFullYear() - data1.getFullYear();
+        let dataAniversarioAno = new Date(data1);
+        dataAniversarioAno.setFullYear(data1.getFullYear() + anosPassados);
+        
+        if (dataAniversarioAno > data2) {
+            anosPassados--;
+        }
+
+        document.getElementById('resultadoDias').innerText = totalDiasAbsolutos;
+        document.getElementById('resultadoSemanasAbsolutas').innerText = totalSemanasAbsolutas;
+        document.getElementById('resAnos').innerText = anosPassados;
+
+        const data2Real = new Date(document.getElementById('data2').value + 'T00:00:00');
+        const alertaDiv = document.getElementById('alertaFuturo');
+        
+        if (data2Real > hoje) {
+            const difHojeFuturoMs = data2Real - hoje;
+            const diasParaOFuturo = Math.floor(difHojeFuturoMs / (1000 * 60 * 60 * 24));
+            
+            alertaDiv.innerHTML = `⏳ <strong>Alerta:</strong> Faltam <strong>${diasParaOFuturo}</strong> dias de hoje até a data final selecionada!`;
+            alertaDiv.style.display = 'block';
+        } else {
+            alertaDiv.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>
